@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZENOME — Multi-model AI Debate Orchestrator</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div id="dashboard-container">
+    
+    <!-- HEADER -->
+    <div id="header">
+      <div class="logo-area">
+        <h1>ZENOME</h1>
+        <span class="tagline">Every AI in the room. One answer.</span>
+      </div>
+      <div class="header-controls">
+        <span id="status-badge" class="badge idle">IDLE</span>
+        <button id="btn-settings" aria-label="Settings">⚙</button>
+      </div>
+    </div>
+
+    <!-- CONFIG PANEL -->
+    <div id="config-panel">
+      <div class="config-columns">
+        <div class="col-left">
+          <h2>1. Select Models</h2>
+          <div id="model-selector-grid">
+            <!-- Rendered via JS -->
+            <button class="model-card" data-platform="chatgpt"><span class="icon">C</span><span class="name">ChatGPT</span><span class="login-dot red"></span></button>
+            <button class="model-card" data-platform="gemini"><span class="icon">G</span><span class="name">Gemini</span><span class="login-dot red"></span></button>
+            <button class="model-card" data-platform="perplexity"><span class="icon">P</span><span class="name">Perplexity</span><span class="login-dot red"></span></button>
+            <button class="model-card" data-platform="deepseek"><span class="icon">D</span><span class="name">DeepSeek</span><span class="login-dot red"></span></button>
+            <button class="model-card" data-platform="kimi"><span class="icon">K</span><span class="name">Kimi</span><span class="login-dot red"></span></button>
+            <button class="model-card" data-platform="qwen"><span class="icon">Q</span><span class="name">Qwen</span><span class="login-dot red"></span></button>
+            <button class="model-card" data-platform="grok"><span class="icon">X</span><span class="name">Grok</span><span class="login-dot red"></span></button>
+          </div>
+        </div>
+        
+        <div class="col-right">
+          <h2>2. Define Task</h2>
+          <div id="task-input-container">
+            <textarea id="task-input" rows="6" placeholder="Describe your task in detail..."></textarea>
+          </div>
+          
+          <div class="config-row">
+            <div class="input-group">
+              <label for="head-ai-select">Head AI (Orchestrator)</label>
+              <select id="head-ai-select" disabled>
+                <option value="" disabled selected>Select models first...</option>
+              </select>
+            </div>
+            <div class="input-group slider-group">
+              <label for="rounds-slider">Debate Rounds: <span id="rounds-badge">3</span></label>
+              <input type="range" id="rounds-slider" min="1" max="5" value="3" step="1">
+              <div class="slider-ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+            </div>
+          </div>
+          
+          <div id="start-btn-container">
+            <button id="start-btn" disabled>Start Debate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE MONITOR -->
+    <div id="live-monitor" class="hidden">
+      <div class="monitor-header">
+        <h2 id="round-progress">Round 1 of 3</h2>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+      </div>
+      
+      <div class="status-board">
+        <div class="status-row head-ai-row">
+          <span class="platform-name">Head AI (Orchestrator)</span>
+          <span class="status-chip waiting" id="status-headai">Waiting</span>
+        </div>
+        <div class="status-divider"></div>
+        <div id="model-status-list">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <div class="monitor-actions">
+        <button id="btn-pause-round" class="outline-btn">Pause after this round</button>
+      </div>
+    </div>
+
+    <!-- LOG VIEWER -->
+    <div id="log-viewer" class="hidden">
+      <h2>Debate Logs</h2>
+      <div id="log-accordion">
+        <!-- Logs added here -->
+      </div>
+    </div>
+
+    <!-- FINAL OUTPUT PANEL -->
+    <div id="final-output-panel" class="hidden">
+      <div class="final-header">
+        <h2>Synthesized Result</h2>
+        <div class="action-bar">
+          <button id="btn-copy">Copy</button>
+          <button id="btn-download-md">Download .md</button>
+          <button id="btn-download-txt">Download .txt</button>
+        </div>
+      </div>
+      
+      <div class="output-content" id="output-rendered">
+        <!-- Rendered text / code blocks -->
+      </div>
+      
+      <div class="output-meta">
+        <details>
+          <summary>Key Insights</summary>
+          <ul id="output-insights"></ul>
+        </details>
+        <details>
+          <summary>Model Agreement Summary</summary>
+          <p id="output-agreement"></p>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SETTINGS PANEL (Slide-in) -->
+  <div id="settings-overlay" class="hidden"></div>
+  <div id="settings-panel">
+    <div class="settings-header">
+      <h2>Settings</h2>
+      <button id="btn-close-settings">×</button>
+    </div>
+    <div class="settings-content">
+      <div class="setting-item">
+        <label>Response Timeout (seconds): <span id="val-timeout">90</span></label>
+        <input type="range" id="setting-timeout" min="30" max="180" value="90" step="10">
+      </div>
+      <div class="setting-item">
+        <label>Base Injection Delay (seconds): <span id="val-delay">4</span></label>
+        <input type="range" id="setting-delay" min="1" max="10" value="4" step="1">
+      </div>
+      <div class="setting-item toggle-row">
+        <label for="setting-debug">Debug Mode</label>
+        <input type="checkbox" id="setting-debug">
+      </div>
+      <div class="setting-item">
+        <button id="btn-refresh-login" class="outline-btn full-width">Refresh Login Status</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
